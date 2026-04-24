@@ -16,6 +16,10 @@ import {
   ShareAltOutlined,
   BarChartOutlined,
   SafetyOutlined,
+  DollarOutlined,
+  FileTextOutlined,
+  QuestionCircleOutlined,
+  FallOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 import ShareManager from './ShareManager';
@@ -30,6 +34,10 @@ const baseMenuItems = [
   { type: 'divider' },
   { key: '/calendar', icon: <CalendarOutlined />, label: '日历' },
   { key: '/ratings', icon: <StarOutlined />, label: '面经评分' },
+  { key: '/salary', icon: <DollarOutlined />, label: '薪资对比' },
+  { key: '/resume', icon: <FileTextOutlined />, label: '简历管理' },
+  { key: '/questions', icon: <QuestionCircleOutlined />, label: '面试题库' },
+  { key: '/rejection', icon: <FallOutlined />, label: '拒因分析' },
   { key: '/tools', icon: <ToolOutlined />, label: '智能导入' },
   { key: '/import', icon: <ImportOutlined />, label: '批量导入' },
   { key: '/report', icon: <BarChartOutlined />, label: '周报' },

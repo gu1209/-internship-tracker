@@ -39,6 +39,10 @@ router.get('/', (req, res) => {
     const rows = result.length > 0 ? result[0].values.map(v => {
       const obj = {};
       columns.forEach((col, i) => obj[col] = v[i]);
+      // Compute stale_days
+      if (obj.updated_at) {
+        obj.stale_days = Math.floor((Date.now() - new Date(obj.updated_at).getTime()) / 86400000);
+      }
       return obj;
     }) : [];
 
@@ -69,7 +73,7 @@ router.get('/:id', (req, res) => {
 router.post('/', (req, res) => {
   try {
     const db = getDb();
-    const { company, position, job_url, delivery_date, interview_date, status, notes } = req.body;
+    const { company, position, job_url, delivery_date, interview_date, status, notes, resume_version_id, rejection_reason, rejection_stage } = req.body;
     const userId = req.user.id;
 
     if (!company || !position || !delivery_date) {
@@ -77,9 +81,9 @@ router.post('/', (req, res) => {
     }
 
     db.run(
-      `INSERT INTO applications (user_id, company, position, job_url, delivery_date, interview_date, status, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [userId, company, position, job_url || '', delivery_date, interview_date || '', status || '已投递', notes || '']
+      `INSERT INTO applications (user_id, company, position, job_url, delivery_date, interview_date, status, notes, resume_version_id, rejection_reason, rejection_stage)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [userId, company, position, job_url || '', delivery_date, interview_date || '', status || '已投递', notes || '', resume_version_id || null, rejection_reason || '', rejection_stage || '']
     );
 
     const idResult = db.exec('SELECT last_insert_rowid()');
@@ -112,10 +116,10 @@ router.put('/:id', (req, res) => {
     const current = {};
     columns.forEach((col, i) => current[col] = existing[0].values[0][i]);
 
-    const { company, position, job_url, delivery_date, interview_date, status, notes } = req.body;
+    const { company, position, job_url, delivery_date, interview_date, status, notes, resume_version_id, rejection_reason, rejection_stage } = req.body;
 
     db.run(
-      `UPDATE applications SET company=?, position=?, job_url=?, delivery_date=?, interview_date=?, status=?, notes=?, updated_at=datetime('now','localtime') WHERE id=? AND user_id=?`,
+      `UPDATE applications SET company=?, position=?, job_url=?, delivery_date=?, interview_date=?, status=?, notes=?, resume_version_id=?, rejection_reason=?, rejection_stage=?, updated_at=datetime('now','localtime') WHERE id=? AND user_id=?`,
       [
         company || current.company,
         position || current.position,
@@ -124,6 +128,9 @@ router.put('/:id', (req, res) => {
         interview_date !== undefined ? interview_date : current.interview_date,
         status || current.status,
         notes !== undefined ? notes : current.notes,
+        resume_version_id !== undefined ? resume_version_id : current.resume_version_id,
+        rejection_reason !== undefined ? rejection_reason : current.rejection_reason,
+        rejection_stage !== undefined ? rejection_stage : current.rejection_stage,
         id, userId
       ]
     );

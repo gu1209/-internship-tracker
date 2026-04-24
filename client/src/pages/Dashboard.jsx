@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Row, Col, Statistic, Spin, Empty, Tag, List } from 'antd';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { SendOutlined, TrophyOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { SendOutlined, TrophyOutlined, ClockCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import api from '../api';
 
 const STATUS_COLORS = {
@@ -12,18 +12,21 @@ const STATUS_COLORS = {
 export default function Dashboard() {
   const [overview, setOverview] = useState(null);
   const [trend, setTrend] = useState([]);
+  const [staleApps, setStaleApps] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetch = async () => {
       setLoading(true);
       try {
-        const [ovRes, trRes] = await Promise.all([
+        const [ovRes, trRes, staleRes] = await Promise.all([
           api.get('/analytics/overview'),
           api.get('/analytics/trend?range=30'),
+          api.get('/analytics/stale?days=7'),
         ]);
         setOverview(ovRes.data);
         setTrend(trRes.data);
+        setStaleApps(staleRes.data);
       } catch (e) {
         console.error(e);
       } finally {
@@ -96,6 +99,18 @@ export default function Dashboard() {
           </Card>
         </Col>
       </Row>
+
+      {staleApps.length > 0 && (
+        <Card title="滞留提醒（7天无进展）" size="small" style={{ marginBottom: 16 }}>
+          <Statistic value={staleApps.length} suffix="条" prefix={<WarningOutlined />} valueStyle={{ color: '#fa8c16' }} />
+          <div style={{ marginTop: 8 }}>
+            {staleApps.slice(0, 5).map(app => (
+              <Tag key={app.id} color="orange">{app.company} - {app.position}（{app.stale_days}天）</Tag>
+            ))}
+            {staleApps.length > 5 && <span style={{ color: '#999' }}>等 {staleApps.length} 条</span>}
+          </div>
+        </Card>
+      )}
 
       {overview.upcomingTodos?.length > 0 && (
         <Card title="未来7天待办" size="small">

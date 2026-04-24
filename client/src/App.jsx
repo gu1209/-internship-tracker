@@ -14,6 +14,10 @@ import Ratings from './pages/Ratings';
 import WeeklyReport from './pages/WeeklyReport';
 import ShareView from './pages/ShareView';
 import AdminPage from './pages/AdminPage';
+import SalaryCompare from './pages/SalaryCompare';
+import ResumeVersions from './pages/ResumeVersions';
+import InterviewQuestions from './pages/InterviewQuestions';
+import RejectionAnalysis from './pages/RejectionAnalysis';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -40,6 +44,10 @@ function AppRoutes() {
       <Route path="/report" element={<ProtectedRoute><AppLayout><WeeklyReport /></AppLayout></ProtectedRoute>} />
       <Route path="/import" element={<ProtectedRoute><AppLayout><BatchImport /></AppLayout></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><AppLayout><AdminPage /></AppLayout></ProtectedRoute>} />
+      <Route path="/salary" element={<ProtectedRoute><AppLayout><SalaryCompare /></AppLayout></ProtectedRoute>} />
+      <Route path="/resume" element={<ProtectedRoute><AppLayout><ResumeVersions /></AppLayout></ProtectedRoute>} />
+      <Route path="/questions" element={<ProtectedRoute><AppLayout><InterviewQuestions /></AppLayout></ProtectedRoute>} />
+      <Route path="/rejection" element={<ProtectedRoute><AppLayout><RejectionAnalysis /></AppLayout></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

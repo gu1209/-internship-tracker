@@ -12,15 +12,25 @@ export default function AppForm({ open, initialValues, onSubmit, onCancel }) {
   const [urlLoading, setUrlLoading] = useState(false);
   const [urlInput, setUrlInput] = useState('');
   const [autoFillSource, setAutoFillSource] = useState('');
+  const [resumeVersions, setResumeVersions] = useState([]);
+  const [currentStatus, setCurrentStatus] = useState('已投递');
+
+  useEffect(() => {
+    if (open) {
+      api.get('/resume').then(r => setResumeVersions(r.data)).catch(() => {});
+    }
+  }, [open]);
 
   useEffect(() => {
     if (open && initialValues) {
+      setCurrentStatus(initialValues.status || '已投递');
       form.setFieldsValue({
         ...initialValues,
         delivery_date: initialValues.delivery_date ? dayjs(initialValues.delivery_date) : null,
         interview_date: initialValues.interview_date ? dayjs(initialValues.interview_date) : null,
       });
     } else if (open) {
+      setCurrentStatus('已投递');
       form.setFieldsValue({
         company: '',
         position: '',
@@ -29,6 +39,9 @@ export default function AppForm({ open, initialValues, onSubmit, onCancel }) {
         interview_date: null,
         status: '已投递',
         notes: '',
+        resume_version_id: undefined,
+        rejection_reason: '',
+        rejection_stage: '',
       });
     }
     setAutoFillSource('');
@@ -181,8 +194,21 @@ export default function AppForm({ open, initialValues, onSubmit, onCancel }) {
           <DatePicker style={{ width: '100%' }} showTime format="YYYY-MM-DD HH:mm" placeholder="选择面试时间（可选）" />
         </Form.Item>
         <Form.Item name="status" label="当前状态">
-          <Select options={STATUS_OPTIONS.map(s => ({ value: s, label: s }))} />
+          <Select options={STATUS_OPTIONS.map(s => ({ value: s, label: s }))} onChange={v => setCurrentStatus(v)} />
         </Form.Item>
+        <Form.Item name="resume_version_id" label="简历版本">
+          <Select allowClear placeholder="选择使用的简历版本（可选）" options={resumeVersions.map(r => ({ value: r.id, label: r.version_name }))} />
+        </Form.Item>
+        {currentStatus === '拒信' && (
+          <>
+            <Form.Item name="rejection_stage" label="被拒环节">
+              <Select options={['简历筛选', '笔试', '一面', '二面', 'HR面', '总监面', '终面', '其他'].map(s => ({ value: s, label: s }))} />
+            </Form.Item>
+            <Form.Item name="rejection_reason" label="拒因">
+              <Input placeholder="如：经验不足、岗位不匹配..." />
+            </Form.Item>
+          </>
+        )}
         <Form.Item name="notes" label="备注">
           <Input.TextArea rows={3} placeholder="备注信息..." />
         </Form.Item>

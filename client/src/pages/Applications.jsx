@@ -95,16 +95,20 @@ export default function Applications() {
   const columns = [
     {
       title: '公司', dataIndex: 'company', key: 'company', width: 160,
-      render: (text, record) => (
-        <div>
-          <strong>{text}</strong>
-          {record.job_url && (
-            <Tooltip title="打开岗位链接">
-              <LinkOutlined style={{ marginLeft: 6, color: '#1890ff', cursor: 'pointer' }} onClick={() => window.open(record.job_url)} />
-            </Tooltip>
-          )}
-        </div>
-      ),
+      render: (text, record) => {
+        const isStale = record.stale_days >= 7;
+        return (
+          <div>
+            <strong style={isStale ? { color: '#d48806' } : {}}>{text}</strong>
+            {isStale && <Tag color="orange" style={{ marginLeft: 4 }}>停滞 {record.stale_days}天</Tag>}
+            {record.job_url && (
+              <Tooltip title="打开岗位链接">
+                <LinkOutlined style={{ marginLeft: 6, color: '#1890ff', cursor: 'pointer' }} onClick={() => window.open(record.job_url)} />
+              </Tooltip>
+            )}
+          </div>
+        );
+      },
     },
     { title: '岗位', dataIndex: 'position', key: 'position', width: 160 },
     { title: '投递日期', dataIndex: 'delivery_date', key: 'delivery_date', width: 110, sorter: (a, b) => a.delivery_date.localeCompare(b.delivery_date) },
@@ -176,6 +180,7 @@ export default function Applications() {
         dataSource={data}
         loading={loading}
         scroll={{ x: 900 }}
+        rowClassName={(record) => record.stale_days >= 7 ? 'stale-row' : ''}
         pagination={{ current: page, total, pageSize, onChange: (p) => setPage(p), showTotal: (t) => `共 ${t} 条` }}
         expandable={{
           expandedRowKeys: expandedRow ? [expandedRow] : [],

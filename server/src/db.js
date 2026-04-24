@@ -159,6 +159,78 @@ async function initDb() {
   db.run('CREATE INDEX IF NOT EXISTS idx_rating_user ON company_ratings(user_id);');
   db.run('CREATE INDEX IF NOT EXISTS idx_share_token ON share_links(token);');
 
+  // Salary comparison
+  db.run(`
+    CREATE TABLE IF NOT EXISTS salary_comparison (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      application_id INTEGER REFERENCES applications(id) ON DELETE SET NULL,
+      company TEXT NOT NULL,
+      position TEXT DEFAULT '',
+      base_salary REAL DEFAULT 0,
+      bonus REAL DEFAULT 0,
+      stock REAL DEFAULT 0,
+      signing_bonus REAL DEFAULT 0,
+      allowance_meal REAL DEFAULT 0,
+      allowance_housing REAL DEFAULT 0,
+      other_benefits TEXT DEFAULT '',
+      total_package REAL DEFAULT 0,
+      work_hours REAL DEFAULT 0,
+      commute_minutes INTEGER DEFAULT 0,
+      notes TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now', 'localtime')),
+      updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+    );
+  `);
+
+  // Resume versions
+  db.run(`
+    CREATE TABLE IF NOT EXISTS resume_versions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      version_name TEXT NOT NULL,
+      target_position TEXT DEFAULT '',
+      content TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now', 'localtime')),
+      updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+    );
+  `);
+
+  // Interview questions bank
+  db.run(`
+    CREATE TABLE IF NOT EXISTS interview_questions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      company TEXT DEFAULT '',
+      position TEXT DEFAULT '',
+      question_type TEXT DEFAULT '',
+      question TEXT NOT NULL,
+      answer TEXT DEFAULT '',
+      difficulty INTEGER DEFAULT 3,
+      tags TEXT DEFAULT '',
+      interview_date TEXT DEFAULT '',
+      source TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now', 'localtime')),
+      updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+    );
+  `);
+
+  // Migration: applications new columns
+  try {
+    db.run('ALTER TABLE applications ADD COLUMN resume_version_id INTEGER REFERENCES resume_versions(id) ON DELETE SET NULL;');
+  } catch (e) { /* exists */ }
+  try {
+    db.run('ALTER TABLE applications ADD COLUMN rejection_reason TEXT DEFAULT \'\';');
+  } catch (e) { /* exists */ }
+  try {
+    db.run('ALTER TABLE applications ADD COLUMN rejection_stage TEXT DEFAULT \'\';');
+  } catch (e) { /* exists */ }
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_salary_user ON salary_comparison(user_id);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_resume_user ON resume_versions(user_id);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_question_user ON interview_questions(user_id);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_question_company ON interview_questions(company);');
+
   saveDb();
   return db;
 }
