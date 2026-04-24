@@ -21,10 +21,15 @@ export default function ShareManager({ open, onClose }) {
     setLoading(true);
     try {
       const res = await api.post('/share', { title });
-      message.success('创建成功！链接已复制');
-      navigator.clipboard.writeText(res.data.url).catch(() => {});
-      fetchLinks();
+      // Copy to clipboard (silently fail if not available)
+      try {
+        await navigator.clipboard.writeText(res.data.url);
+        message.success('创建成功！链接已复制');
+      } catch {
+        message.success('创建成功！请手动复制链接');
+      }
       setTitle('');
+      await fetchLinks();
     } catch (e) {
       message.error('创建失败');
     } finally {
