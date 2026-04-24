@@ -17,13 +17,33 @@ export default function ShareManager({ open, onClose }) {
 
   React.useEffect(() => { if (open) fetchLinks(); }, [open]);
 
+  const copyToClipboard = (text) => {
+    if (navigator.clipboard?.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+    // Fallback for HTTP
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
+      return Promise.resolve();
+    } catch {
+      return Promise.reject();
+    } finally {
+      document.body.removeChild(textarea);
+    }
+  };
+
   const handleCreate = async () => {
     setLoading(true);
     try {
       const res = await api.post('/share', { title });
-      // Copy to clipboard (silently fail if not available)
       try {
-        await navigator.clipboard.writeText(res.data.url);
+        await copyToClipboard(res.data.url);
         message.success('创建成功！链接已复制');
       } catch {
         message.success('创建成功！请手动复制链接');
@@ -49,7 +69,26 @@ export default function ShareManager({ open, onClose }) {
 
   const handleCopy = (token) => {
     const url = `${window.location.origin}/share/${token}`;
-    navigator.clipboard.writeText(url).then(() => message.success('已复制')).catch(() => message.error('复制失败'));
+    const fallbackCopy = () => {
+      const textarea = document.createElement('textarea');
+      textarea.value = url;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        message.success('已复制链接');
+      } catch {
+        message.error('复制失败，请手动复制');
+      }
+      document.body.removeChild(textarea);
+    };
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(() => message.success('已复制链接')).catch(fallbackCopy);
+    } else {
+      fallbackCopy();
+    }
   };
 
   return (
