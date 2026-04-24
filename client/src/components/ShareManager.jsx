@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Modal, Input, DatePicker, Button, List, Tag, message, Empty, Popconfirm, Space } from 'antd';
 import { ShareAltOutlined, DeleteOutlined, CopyOutlined, LinkOutlined } from '@ant-design/icons';
 import api from '../api';
@@ -7,6 +7,15 @@ export default function ShareManager({ open, onClose }) {
   const [links, setLinks] = useState([]);
   const [title, setTitle] = useState('我的投递记录');
   const [loading, setLoading] = useState(false);
+  const [copyUrl, setCopyUrl] = useState('');
+  const copyInputRef = useRef(null);
+
+  useEffect(() => {
+    if (copyUrl && copyInputRef.current) {
+      copyInputRef.current.focus();
+      copyInputRef.current.select();
+    }
+  }, [copyUrl]);
 
   const fetchLinks = async () => {
     try {
@@ -17,37 +26,15 @@ export default function ShareManager({ open, onClose }) {
 
   React.useEffect(() => { if (open) fetchLinks(); }, [open]);
 
-  const copyToClipboard = (text) => {
-    if (navigator.clipboard?.writeText) {
-      return navigator.clipboard.writeText(text);
-    }
-    // Fallback for HTTP
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-      document.execCommand('copy');
-      return Promise.resolve();
-    } catch {
-      return Promise.reject();
-    } finally {
-      document.body.removeChild(textarea);
-    }
+  const showCopyModal = (text) => {
+    setCopyUrl(text);
   };
 
   const handleCreate = async () => {
     setLoading(true);
     try {
       const res = await api.post('/share', { title });
-      try {
-        await copyToClipboard(res.data.url);
-        message.success('创建成功！链接已复制');
-      } catch {
-        message.success('创建成功！请手动复制链接');
-      }
+      showCopyModal(res.data.url);
       setTitle('');
       await fetchLinks();
     } catch (e) {
@@ -69,29 +56,11 @@ export default function ShareManager({ open, onClose }) {
 
   const handleCopy = (token) => {
     const url = `${window.location.origin}/share/${token}`;
-    const fallbackCopy = () => {
-      const textarea = document.createElement('textarea');
-      textarea.value = url;
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
-      textarea.select();
-      try {
-        document.execCommand('copy');
-        message.success('已复制链接');
-      } catch {
-        message.error('复制失败，请手动复制');
-      }
-      document.body.removeChild(textarea);
-    };
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(url).then(() => message.success('已复制链接')).catch(fallbackCopy);
-    } else {
-      fallbackCopy();
-    }
+    showCopyModal(url);
   };
 
   return (
+    <>
     <Modal title={<><ShareAltOutlined /> 分享链接管理</>} open={open} onCancel={onClose} footer={null} width={560}>
       <Space style={{ marginBottom: 16 }}>
         <Input
@@ -135,5 +104,25 @@ export default function ShareManager({ open, onClose }) {
         />
       )}
     </Modal>
+
+    <Modal title="复制分享链接" open={!!copyUrl} onCancel={() => setCopyUrl('')} footer={null} width={480}>
+      <Space.Compact style={{ width: '100%' }}>
+        <Input ref={copyInputRef} value={copyUrl} readOnly />
+        <Button icon={<CopyOutlined />} onClick={() => {
+          if (navigator.clipboard?.writeText) {
+            navigator.clipboard.writeText(copyUrl).then(() => {
+              message.success('已复制');
+              setCopyUrl('');
+            });
+          } else {
+            copyInputRef.current?.select();
+            try { document.execCommand('copy'); message.success('已复制'); }
+            catch { message.info('请选中链接后手动复制'); }
+          }
+        }}>复制</Button>
+      </Space.Compact>
+      <p style={{ color: '#999', fontSize: 12, marginTop: 8 }}>点击上方按钮复制，或选中链接后按 Ctrl+C</p>
+    </Modal>
+    </>
   );
 }
