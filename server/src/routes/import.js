@@ -10,7 +10,8 @@ router.post('/preview', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: '请上传文件' });
 
-    const text = req.file.buffer.toString('utf-8-sig');
+    let text = req.file.buffer.toString('utf8');
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1); // Strip BOM
     const rows = parseCSV(text);
 
     if (rows.length < 2) return res.status(400).json({ error: '文件数据不足' });
