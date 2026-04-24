@@ -1,0 +1,166 @@
+const initSqlJs = require('sql.js');
+const fs = require('fs');
+const path = require('path');
+
+const DB_PATH = path.join(__dirname, '..', 'data', 'app.db');
+
+let db = null;
+
+async function initDb() {
+  const SQL = await initSqlJs();
+
+  if (fs.existsSync(DB_PATH)) {
+    const buffer = fs.readFileSync(DB_PATH);
+    db = new SQL.Database(buffer);
+  } else {
+    db = new SQL.Database();
+  }
+
+  db.run('PRAGMA foreign_keys = ON;');
+
+  // Users table
+  db.run(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now', 'localtime'))
+    );
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS applications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      company TEXT NOT NULL,
+      position TEXT NOT NULL,
+      job_url TEXT DEFAULT '',
+      delivery_date TEXT NOT NULL,
+      interview_date TEXT DEFAULT '',
+      status TEXT NOT NULL DEFAULT '已投递',
+      notes TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now', 'localtime')),
+      updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+    );
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS timeline (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      application_id INTEGER NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+      event_date TEXT NOT NULL,
+      event_type TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now', 'localtime'))
+    );
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS todos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      application_id INTEGER REFERENCES applications(id) ON DELETE SET NULL,
+      description TEXT NOT NULL,
+      due_date TEXT NOT NULL,
+      done INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now', 'localtime'))
+    );
+  `);
+
+  // Migration: add user_id column to existing tables if missing
+  try {
+    db.run('ALTER TABLE applications ADD COLUMN user_id INTEGER REFERENCES users(id) ON DELETE CASCADE;');
+  } catch (e) { /* column already exists */ }
+  try {
+    db.run('ALTER TABLE applications ADD COLUMN interview_date TEXT DEFAULT \'\';');
+  } catch (e) { /* column already exists */ }
+  try {
+    db.run('ALTER TABLE timeline ADD COLUMN user_id INTEGER REFERENCES users(id) ON DELETE CASCADE;');
+  } catch (e) { /* column already exists */ }
+  try {
+    db.run('ALTER TABLE todos ADD COLUMN user_id INTEGER REFERENCES users(id) ON DELETE CASCADE;');
+  } catch (e) { /* column already exists */ }
+
+  // If there are existing rows without user_id, assign them to a default user
+  const existingApps = db.exec('SELECT COUNT(*) FROM applications WHERE user_id IS NULL');
+  const hasOrphaned = existingApps[0]?.values[0]?.[0] > 0;
+
+  if (hasOrphaned) {
+    // Create a default user for migration
+    const existingUser = db.exec('SELECT id FROM users WHERE username = \'admin\'');
+    let defaultUserId;
+    if (existingUser.length > 0 && existingUser[0].values.length > 0) {
+      defaultUserId = existingUser[0].values[0][0];
+    } else {
+      const bcrypt = require('bcryptjs');
+      const hash = bcrypt.hashSync('admin123', 10);
+      db.run('INSERT INTO users (username, password_hash) VALUES (?, ?)', ['admin', hash]);
+      const idResult = db.exec('SELECT last_insert_rowid()');
+      defaultUserId = idResult[0].values[0][0];
+    }
+    db.run('UPDATE applications SET user_id = ? WHERE user_id IS NULL', [defaultUserId]);
+    db.run('UPDATE timeline SET user_id = ? WHERE user_id IS NULL', [defaultUserId]);
+    db.run('UPDATE todos SET user_id = ? WHERE user_id IS NULL', [defaultUserId]);
+  }
+
+  // Indexes
+  db.run('CREATE INDEX IF NOT EXISTS idx_app_user ON applications(user_id);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_app_status ON applications(status);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_app_date ON applications(delivery_date);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_tl_user ON timeline(user_id);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_tl_app ON timeline(application_id);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_todo_user ON todos(user_id);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_todo_date ON todos(due_date);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_todo_done ON todos(done);');
+
+  // Company ratings / interview notes
+  db.run(`
+    CREATE TABLE IF NOT EXISTS company_ratings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      company TEXT NOT NULL,
+      application_id INTEGER REFERENCES applications(id) ON DELETE SET NULL,
+      rating INTEGER CHECK(rating >= 1 AND rating <= 5),
+      interview_stage TEXT DEFAULT '',
+      interview_notes TEXT DEFAULT '',
+      salary TEXT DEFAULT '',
+      tags TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now', 'localtime')),
+      updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+    );
+  `);
+
+  // Share links (read-only access)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS share_links (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      token TEXT NOT NULL UNIQUE,
+      title TEXT DEFAULT '',
+      expire_date TEXT DEFAULT '',
+      view_count INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now', 'localtime'))
+    );
+  `);
+
+  db.run('CREATE INDEX IF NOT EXISTS idx_rating_user ON company_ratings(user_id);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_share_token ON share_links(token);');
+
+  saveDb();
+  return db;
+}
+
+function saveDb() {
+  if (!db) return;
+  const data = db.export();
+  const buffer = Buffer.from(data);
+  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+  fs.writeFileSync(DB_PATH, buffer);
+}
+
+function getDb() {
+  return db;
+}
+
+module.exports = { initDb, getDb, saveDb };
