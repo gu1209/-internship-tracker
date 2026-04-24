@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Menu, Button, Dropdown, Drawer } from 'antd';
+import { Layout, Menu, Button, Dropdown, Drawer, Avatar } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   SendOutlined,
@@ -77,13 +77,25 @@ export default function AppLayout({ children }) {
     setMobileMenuOpen(false);
   };
 
+  const pageTitle = getPageTitle(location.pathname);
+
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       {/* Desktop sidebar */}
       {!isMobile && (
-        <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed} breakpoint="md">
-          <div style={{ height: 32, margin: 16, color: '#fff', fontSize: collapsed ? 14 : 16, fontWeight: 'bold', textAlign: 'center' }}>
-            {collapsed ? '📮' : '实习投递管理'}
+        <Sider
+          collapsible
+          collapsed={collapsed}
+          onCollapse={setCollapsed}
+          breakpoint="md"
+          style={{
+            background: 'linear-gradient(180deg, #1C1917 0%, #292524 100%)',
+            borderRight: '1px solid var(--border)',
+          }}
+        >
+          <div style={siderLogoStyle(collapsed)}>
+            <SendOutlined style={{ fontSize: collapsed ? 20 : 22, color: 'var(--primary)' }} />
+            {!collapsed && <span style={{ marginLeft: 8, fontSize: 16, fontWeight: 700 }}>投递管理</span>}
           </div>
           <Menu
             theme="dark"
@@ -91,6 +103,7 @@ export default function AppLayout({ children }) {
             selectedKeys={[location.pathname]}
             items={menuItems}
             onClick={handleMenuClick}
+            style={{ background: 'transparent', borderRight: 'none' }}
           />
         </Sider>
       )}
@@ -100,45 +113,39 @@ export default function AppLayout({ children }) {
         placement="left"
         onClose={() => setMobileMenuOpen(false)}
         open={mobileMenuOpen}
-        width={240}
-        styles={{ body: { padding: 0 } }}
+        width={260}
+        styles={{ body: { padding: 0, background: '#1C1917' } }}
       >
-        <div style={{ padding: '16px 16px 8px', fontSize: 18, fontWeight: 'bold' }}>📮 实习投递管理</div>
+        <div style={{ padding: '20px 16px 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <SendOutlined style={{ fontSize: 22, color: 'var(--primary)' }} />
+          <span style={{ fontSize: 17, fontWeight: 700, color: '#fff' }}>投递管理</span>
+        </div>
         <Menu
+          theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
           items={menuItems}
           onClick={handleMenuClick}
+          style={{ background: 'transparent', borderRight: 'none' }}
         />
       </Drawer>
 
       <Layout>
-        <Header style={{
-          padding: isMobile ? '0 12px' : '0 24px',
-          background: '#fff',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          borderBottom: '1px solid #f0f0f0',
-        }}>
+        <Header style={headerStyle}>
           {isMobile && (
             <Button type="text" icon={<MenuOutlined style={{ fontSize: 20 }} />} onClick={() => setMobileMenuOpen(true)} />
           )}
-          <div style={{ flex: 1 }} />
+          <div style={{ flex: 1, paddingLeft: isMobile ? 8 : 0 }}>
+            <span style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{pageTitle}</span>
+          </div>
           <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-            <Button type="text" icon={<UserOutlined />}>
-              {!isMobile && user?.username}
-            </Button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '4px 12px', borderRadius: 8 }}>
+              <Avatar size="small" icon={<UserOutlined />} style={{ background: 'var(--primary)' }} />
+              {!isMobile && <span style={{ fontSize: 14, color: 'var(--text)' }}>{user?.username}</span>}
+            </div>
           </Dropdown>
         </Header>
-        <Content style={{
-          margin: isMobile ? 8 : 24,
-          padding: isMobile ? 12 : 24,
-          background: '#fff',
-          borderRadius: 8,
-          minHeight: 360,
-          overflowX: 'auto',
-        }}>
+        <Content style={contentStyle(isMobile)}>
           {children}
         </Content>
       </Layout>
@@ -146,4 +153,60 @@ export default function AppLayout({ children }) {
       <ShareManager open={shareOpen} onClose={() => setShareOpen(false)} />
     </Layout>
   );
+}
+
+function getPageTitle(path) {
+  const map = {
+    '/': '投递记录',
+    '/timeline': '时间线',
+    '/todos': '待办事项',
+    '/dashboard': '统计看板',
+    '/calendar': '日历',
+    '/ratings': '面经评分',
+    '/salary': '薪资对比',
+    '/resume': '简历管理',
+    '/questions': '面试题库',
+    '/rejection': '拒因分析',
+    '/tools': '智能导入',
+    '/import': '批量导入',
+    '/report': '周报',
+    '/admin': '用户管理',
+  };
+  return map[path] || '实习投递管理';
+}
+
+function siderLogoStyle(collapsed) {
+  return {
+    height: 48,
+    margin: collapsed ? '16px 12px' : '16px 20px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: collapsed ? 'center' : 'flex-start',
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 700,
+  };
+}
+
+const headerStyle = {
+  padding: '0 24px',
+  background: '#fff',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  borderBottom: '1px solid var(--border)',
+  height: 56,
+  boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+};
+
+function contentStyle(isMobile) {
+  return {
+    margin: isMobile ? 8 : 20,
+    padding: isMobile ? 12 : 24,
+    background: '#fff',
+    borderRadius: 12,
+    minHeight: 360,
+    overflowX: 'auto',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+  };
 }

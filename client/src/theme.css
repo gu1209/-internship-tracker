@@ -1,0 +1,138 @@
+:root {
+  --primary: #EA580C;
+  --primary-light: #FDBA74;
+  --primary-dark: #C2410C;
+  --accent: #0D9488;
+  --accent-light: #5EEAD4;
+  --rose: #E11D48;
+  --gold: #F59E0B;
+  --emerald: #059669;
+
+  --bg: #FFFBF5;
+  --bg-warm: #FFF7ED;
+  --bg-card: #FFFFFF;
+  --border: #FDE8D8;
+  --border-light: #FFF1E6;
+
+  --text: #1C1917;
+  --text-secondary: #78716C;
+  --text-muted: #A8A29E;
+
+  --shadow-sm: 0 1px 3px rgba(234, 88, 12, 0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 12px rgba(234, 88, 12, 0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 8px 24px rgba(234, 88, 12, 0.1), 0 4px 8px rgba(0,0,0,0.04);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-xs: 6px;
+}
+
+body {
+  background: var(--bg) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+.warm-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.warm-card:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--border), transparent);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stale-row { background: #FEF3C7 !important; }
+.stale-row:hover { background: #FDE68A !important; }
+
+.ant-btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+  border: none !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.3) !important;
+}
+
+.ant-btn-primary:hover {
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+.ant-card {
+  border-radius: var(--radius) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.ant-card:hover {
+  box-shadow: var(--shadow) !important;
+}
+
+.ant-card .ant-card-head {
+  border-bottom: 1px solid var(--border) !important;
+  font-weight: 600 !important;
+}
+
+.ant-table-wrapper .ant-table {
+  border-radius: var(--radius) !important;
+}
+
+.ant-table-wrapper .ant-table-thead > tr > th {
+  background: var(--bg-warm) !important;
+  font-weight: 600 !important;
+  border-bottom: 2px solid var(--border) !important;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr:hover > td {
+  background: var(--bg-warm) !important;
+}
+
+.ant-select-selector, .ant-input, .ant-input-affix-wrapper {
+  border-radius: var(--radius-xs) !important;
+  border-color: var(--border) !important;
+}
+
+.ant-select-selector:hover, .ant-input:hover, .ant-input-affix-wrapper:hover,
+.ant-select-focused .ant-select-selector, .ant-input:focus, .ant-input-affix-wrapper:focus {
+  border-color: var(--primary-light) !important;
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.1) !important;
+}
+
+.ant-tag {
+  border-radius: var(--radius-xs) !important;
+  font-weight: 500 !important;
+}
+
+.ant-modal-content {
+  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.ant-statistic-content-value {
+  font-weight: 700 !important;
+}
