@@ -18,6 +18,9 @@ import SalaryCompare from './pages/SalaryCompare';
 import ResumeVersions from './pages/ResumeVersions';
 import InterviewQuestions from './pages/InterviewQuestions';
 import RejectionAnalysis from './pages/RejectionAnalysis';
+import Friends from './pages/Friends';
+import Groups from './pages/Groups';
+import SharedContent from './pages/SharedContent';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -48,6 +51,9 @@ function AppRoutes() {
       <Route path="/resume" element={<ProtectedRoute><AppLayout><ResumeVersions /></AppLayout></ProtectedRoute>} />
       <Route path="/questions" element={<ProtectedRoute><AppLayout><InterviewQuestions /></AppLayout></ProtectedRoute>} />
       <Route path="/rejection" element={<ProtectedRoute><AppLayout><RejectionAnalysis /></AppLayout></ProtectedRoute>} />
+      <Route path="/friends" element={<ProtectedRoute><AppLayout><Friends /></AppLayout></ProtectedRoute>} />
+      <Route path="/groups" element={<ProtectedRoute><AppLayout><Groups /></AppLayout></ProtectedRoute>} />
+      <Route path="/shared" element={<ProtectedRoute><AppLayout><SharedContent /></AppLayout></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

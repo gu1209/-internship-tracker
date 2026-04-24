@@ -30,6 +30,9 @@ app.use('/api/admin', require('./routes/admin')); // admin management
 app.use('/api/salary', require('./routes/salary'));
 app.use('/api/resume', require('./routes/resume'));
 app.use('/api/questions', require('./routes/questions'));
+app.use('/api/friends', authMiddleware, require('./routes/friends'));
+app.use('/api/groups', authMiddleware, require('./routes/groups'));
+app.use('/api/shared', authMiddleware, require('./routes/shared'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

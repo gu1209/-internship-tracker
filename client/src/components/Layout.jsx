@@ -20,6 +20,8 @@ import {
   FileTextOutlined,
   QuestionCircleOutlined,
   FallOutlined,
+  TeamOutlined,
+  UsergroupAddOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 import ShareManager from './ShareManager';
@@ -41,6 +43,10 @@ const baseMenuItems = [
   { key: '/tools', icon: <ToolOutlined />, label: '智能导入' },
   { key: '/import', icon: <ImportOutlined />, label: '批量导入' },
   { key: '/report', icon: <BarChartOutlined />, label: '周报' },
+  { type: 'divider' },
+  { key: '/friends', icon: <TeamOutlined />, label: '好友管理' },
+  { key: '/groups', icon: <UsergroupAddOutlined />, label: '群组' },
+  { key: '/shared', icon: <ShareAltOutlined />, label: '好友共享' },
 ];
 
 export default function AppLayout({ children }) {
@@ -171,6 +177,9 @@ function getPageTitle(path) {
     '/import': '批量导入',
     '/report': '周报',
     '/admin': '用户管理',
+    '/friends': '好友管理',
+    '/groups': '群组',
+    '/shared': '好友共享',
   };
   return map[path] || '实习投递管理';
 }

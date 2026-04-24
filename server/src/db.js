@@ -226,10 +226,82 @@ async function initDb() {
     db.run('ALTER TABLE applications ADD COLUMN rejection_stage TEXT DEFAULT \'\';');
   } catch (e) { /* exists */ }
 
+  // === Friends & Groups & Sharing ===
+
+  // Friend relationships
+  db.run(`
+    CREATE TABLE IF NOT EXISTS friends (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      friend_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TEXT DEFAULT (datetime('now', 'localtime')),
+      UNIQUE(user_id, friend_id)
+    );
+  `);
+
+  // Groups
+  db.run(`
+    CREATE TABLE IF NOT EXISTS groups (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      invite_token TEXT UNIQUE,
+      created_at TEXT DEFAULT (datetime('now', 'localtime'))
+    );
+  `);
+
+  // Group members
+  db.run(`
+    CREATE TABLE IF NOT EXISTS group_members (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      role TEXT NOT NULL DEFAULT 'member',
+      joined_at TEXT DEFAULT (datetime('now', 'localtime')),
+      UNIQUE(group_id, user_id)
+    );
+  `);
+
+  // Friend permissions (bidirectional - each user controls what the other sees)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS friend_permissions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      relationship_id INTEGER NOT NULL REFERENCES friends(id) ON DELETE CASCADE,
+      owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      can_view_questions INTEGER DEFAULT 1,
+      can_view_ratings INTEGER DEFAULT 1,
+      UNIQUE(relationship_id, owner_id)
+    );
+  `);
+
+  // Group permissions (each member controls what others see from them)
+  db.run(`
+    CREATE TABLE IF NOT EXISTS group_permissions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+      owner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      can_view_questions INTEGER DEFAULT 1,
+      can_view_ratings INTEGER DEFAULT 1,
+      UNIQUE(group_id, owner_id)
+    );
+  `);
+
   db.run('CREATE INDEX IF NOT EXISTS idx_salary_user ON salary_comparison(user_id);');
   db.run('CREATE INDEX IF NOT EXISTS idx_resume_user ON resume_versions(user_id);');
   db.run('CREATE INDEX IF NOT EXISTS idx_question_user ON interview_questions(user_id);');
   db.run('CREATE INDEX IF NOT EXISTS idx_question_company ON interview_questions(company);');
+
+  // Friends & Groups indexes
+  db.run('CREATE INDEX IF NOT EXISTS idx_friends_user ON friends(user_id);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_friends_friend ON friends(friend_id);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_friends_status ON friends(status);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_group_token ON groups(invite_token);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_groupmem_group ON group_members(group_id);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_groupmem_user ON group_members(user_id);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_fperm_rel ON friend_permissions(relationship_id);');
+  db.run('CREATE INDEX IF NOT EXISTS idx_gperm_group ON group_permissions(group_id);');
 
   saveDb();
   return db;
