@@ -26,6 +26,7 @@ app.use('/api/calendar', authMiddleware, require('./routes/calendar'));
 app.use('/api/ratings', authMiddleware, require('./routes/ratings'));
 app.use('/api/report', authMiddleware, require('./routes/report'));
 app.use('/api/share', require('./routes/share')); // share has its own auth for public links
+app.use('/api/admin', require('./routes/admin')); // admin management
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

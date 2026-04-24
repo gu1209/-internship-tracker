@@ -24,6 +24,8 @@ async function initDb() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT NOT NULL UNIQUE,
       password_hash TEXT NOT NULL,
+      is_admin INTEGER DEFAULT 0,
+      approved INTEGER DEFAULT 1,
       created_at TEXT DEFAULT (datetime('now', 'localtime'))
     );
   `);
@@ -82,6 +84,16 @@ async function initDb() {
     db.run('ALTER TABLE todos ADD COLUMN user_id INTEGER REFERENCES users(id) ON DELETE CASCADE;');
   } catch (e) { /* column already exists */ }
 
+  // Migration: add is_admin and approved columns
+  try {
+    db.run('ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0;');
+  } catch (e) { /* already exists */ }
+  try {
+    db.run('ALTER TABLE users ADD COLUMN approved INTEGER DEFAULT 1;');
+  } catch (e) { /* already exists */ }
+  // Ensure admin user is marked as admin and approved
+  db.run("UPDATE users SET is_admin = 1, approved = 1 WHERE username = 'admin'");
+
   // If there are existing rows without user_id, assign them to a default user
   const existingApps = db.exec('SELECT COUNT(*) FROM applications WHERE user_id IS NULL');
   const hasOrphaned = existingApps[0]?.values[0]?.[0] > 0;
@@ -95,7 +107,7 @@ async function initDb() {
     } else {
       const bcrypt = require('bcryptjs');
       const hash = bcrypt.hashSync('admin123', 10);
-      db.run('INSERT INTO users (username, password_hash) VALUES (?, ?)', ['admin', hash]);
+      db.run('INSERT INTO users (username, password_hash, is_admin, approved) VALUES (?, ?, 1, 1)', ['admin', hash]);
       const idResult = db.exec('SELECT last_insert_rowid()');
       defaultUserId = idResult[0].values[0][0];
     }

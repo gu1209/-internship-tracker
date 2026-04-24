@@ -29,12 +29,7 @@ export function AuthProvider({ children }) {
 
   const register = async (username, password) => {
     const res = await api.post('/auth/register', { username, password });
-    const { token, user } = res.data;
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    setUser(user);
-    return user;
+    return res.data; // { message } only, no auto-login
   };
 
   const logout = () => {

@@ -13,6 +13,7 @@ import CalendarPage from './pages/CalendarPage';
 import Ratings from './pages/Ratings';
 import WeeklyReport from './pages/WeeklyReport';
 import ShareView from './pages/ShareView';
+import AdminPage from './pages/AdminPage';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -38,6 +39,7 @@ function AppRoutes() {
       <Route path="/ratings" element={<ProtectedRoute><AppLayout><Ratings /></AppLayout></ProtectedRoute>} />
       <Route path="/report" element={<ProtectedRoute><AppLayout><WeeklyReport /></AppLayout></ProtectedRoute>} />
       <Route path="/import" element={<ProtectedRoute><AppLayout><BatchImport /></AppLayout></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute><AppLayout><AdminPage /></AppLayout></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

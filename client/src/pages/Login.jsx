@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Card, Tabs, message } from 'antd';
+import { Form, Input, Button, Card, Tabs, message, Result } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -8,6 +8,7 @@ export default function LoginPage() {
   const { login, register } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState(false);
 
   const handleLogin = async (values) => {
     setLoading(true);
@@ -16,7 +17,12 @@ export default function LoginPage() {
       message.success('登录成功');
       navigate('/');
     } catch (e) {
-      message.error(e.response?.data?.error || '登录失败');
+      const err = e.response?.data?.error || '登录失败';
+      if (err.includes('审批') || err.includes('审核')) {
+        setPending(true);
+      } else {
+        message.error(err);
+      }
     } finally {
       setLoading(false);
     }
@@ -25,15 +31,40 @@ export default function LoginPage() {
   const handleRegister = async (values) => {
     setLoading(true);
     try {
-      await register(values.username, values.password);
-      message.success('注册成功');
-      navigate('/');
+      const data = await register(values.username, values.password);
+      message.success(data.message || '注册成功，请等待管理员审批');
+      setPending(true);
     } catch (e) {
       message.error(e.response?.data?.error || '注册失败');
     } finally {
       setLoading(false);
     }
   };
+
+  if (pending) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      }}>
+        <Card style={{ width: 420, boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+          <Result
+            status="warning"
+            title="等待审批"
+            subTitle="你的账号已注册，正在等待管理员审核通过。审核通过后即可登录使用。"
+            extra={
+              <Button type="primary" onClick={() => setPending(false)}>
+                返回登录
+              </Button>
+            }
+          />
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div style={{

@@ -15,13 +15,14 @@ import {
   StarOutlined,
   ShareAltOutlined,
   BarChartOutlined,
+  SafetyOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../context/AuthContext';
 import ShareManager from './ShareManager';
 
 const { Sider, Content, Header } = Layout;
 
-const menuItems = [
+const baseMenuItems = [
   { key: '/', icon: <SendOutlined />, label: '投递记录' },
   { key: '/timeline', icon: <ClockCircleOutlined />, label: '时间线' },
   { key: '/todos', icon: <CheckSquareOutlined />, label: '待办事项' },
@@ -42,6 +43,15 @@ export default function AppLayout({ children }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const isAdmin = user?.is_admin;
+
+  const menuItems = [...baseMenuItems];
+  if (isAdmin) {
+    menuItems.push(
+      { type: 'divider' },
+      { key: '/admin', icon: <SafetyOutlined />, label: '用户管理' },
+    );
+  }
 
   useEffect(() => {
     const handleResize = () => setCollapsed(window.innerWidth < 768);
