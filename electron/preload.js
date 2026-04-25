@@ -12,10 +12,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getToken: () => ipcRenderer.invoke('get-token'),
   setToken: (token) => ipcRenderer.invoke('set-token', token),
 
-  // Server URL
-  getServerUrl: () => ipcRenderer.invoke('get-server-url'),
-  setServerUrl: (url) => ipcRenderer.invoke('set-server-url', url),
-
   // Pet animation triggers
   sendAction: (action) => ipcRenderer.send('pet-action', action),
 

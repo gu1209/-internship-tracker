@@ -1,6 +1,6 @@
 // === STATE ===
 let token = null;
-let serverUrl = 'http://localhost:3001';
+let serverUrl = 'http://121.41.118.22:3001';
 let username = '';
 let recentApps = [];
 
@@ -49,7 +49,6 @@ document.querySelectorAll('.tab').forEach(tab => {
 
 // === LOGIN ===
 document.getElementById('login-btn').addEventListener('click', async () => {
-  const url = document.getElementById('server-url').value.trim() || 'http://localhost:3001';
   const uname = document.getElementById('username').value.trim();
   const pwd = document.getElementById('password').value;
   const errorEl = document.getElementById('login-error');
@@ -58,9 +57,6 @@ document.getElementById('login-btn').addEventListener('click', async () => {
     errorEl.textContent = '请输入用户名和密码';
     return;
   }
-
-  serverUrl = url;
-  window.electronAPI.setServerUrl(url);
 
   try {
     const data = await apiFetch('/api/auth/login', {
@@ -92,8 +88,6 @@ function showLoggedIn() {
   document.getElementById('login-view').classList.add('hidden');
   document.getElementById('add-view').classList.remove('hidden');
   document.getElementById('logout-btn').classList.remove('hidden');
-  document.getElementById('user-info').textContent = `👤 ${username}`;
-  document.getElementById('user-info').classList.remove('hidden');
 
   // Reset tabs to show add tab
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -104,7 +98,6 @@ function showLoggedOut() {
   document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
   document.getElementById('login-view').classList.remove('hidden');
   document.getElementById('logout-btn').classList.add('hidden');
-  document.getElementById('user-info').classList.add('hidden');
 }
 
 // === QUICK ADD ===
@@ -258,12 +251,6 @@ document.getElementById('refresh-overview').addEventListener('click', loadOvervi
 // === INIT: Check saved token ===
 (async function init() {
   const savedToken = await window.electronAPI.getToken();
-  const savedUrl = await window.electronAPI.getServerUrl();
-
-  if (savedUrl) {
-    serverUrl = savedUrl;
-    document.getElementById('server-url').value = savedUrl;
-  }
 
   if (savedToken) {
     token = savedToken;

@@ -26,8 +26,8 @@ let petWin = null;
 let panelWin = null;
 let tray = null;
 
-const PET_WIDTH = 100;
-const PET_HEIGHT = 120;
+const PET_WIDTH = 80;
+const PET_HEIGHT = 100;
 
 function createPetWindow() {
   const savedPos = store.get('petPosition');
@@ -69,8 +69,8 @@ function createPanelWindow() {
   const display = screen.getPrimaryDisplay();
   const { width: screenW } = display.workAreaSize;
 
-  const panelW = 360;
-  const panelH = 460;
+  const panelW = 300;
+  const panelH = 380;
 
   // Position panel above the pet
   let [petX, petY] = petWin.getPosition();
@@ -176,14 +176,6 @@ ipcMain.handle('get-token', () => {
 
 ipcMain.handle('set-token', (_, token) => {
   store.set('authToken', token);
-});
-
-ipcMain.handle('get-server-url', () => {
-  return store.get('serverUrl') || 'http://localhost:3001';
-});
-
-ipcMain.handle('set-server-url', (_, url) => {
-  store.set('serverUrl', url);
 });
 
 ipcMain.on('pet-action', (_, action) => {
