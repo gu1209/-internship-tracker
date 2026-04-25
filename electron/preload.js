@@ -1,0 +1,26 @@
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  // Panel control
+  openPanel: () => ipcRenderer.invoke('open-panel'),
+  closePanel: () => ipcRenderer.invoke('close-panel'),
+
+  // Auth token persistence
+  getToken: () => ipcRenderer.invoke('get-token'),
+  setToken: (token) => ipcRenderer.invoke('set-token', token),
+
+  // Server URL
+  getServerUrl: () => ipcRenderer.invoke('get-server-url'),
+  setServerUrl: (url) => ipcRenderer.invoke('set-server-url', url),
+
+  // Pet animation triggers
+  sendAction: (action) => ipcRenderer.send('pet-action', action),
+
+  // Listen for events from main process
+  onPanelClosed: (callback) => {
+    ipcRenderer.on('panel-closed', callback);
+  },
+  onPetAction: (callback) => {
+    ipcRenderer.on('pet-action', (_, action) => callback(action));
+  },
+});

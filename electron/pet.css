@@ -1,0 +1,254 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  cursor: grab;
+}
+
+body:active {
+  cursor: grabbing;
+}
+
+/* === PET CONTAINER === */
+.pet {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 110px;
+  cursor: grab;
+  -webkit-app-region: drag;
+}
+
+.pet:active {
+  cursor: grabbing;
+}
+
+/* === BODY === */
+.pet-body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* Sunset background circle */
+.sunset-bg {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: linear-gradient(180deg,
+    #FFB347 0%,
+    #EA580C 30%,
+    #C2410C 60%,
+    #7C2D12 100%
+  );
+  box-shadow:
+    0 0 20px rgba(234, 88, 12, 0.4),
+    0 0 40px rgba(234, 88, 12, 0.2);
+  animation: glow 3s ease-in-out infinite;
+}
+
+/* === FACE === */
+.face {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.eyes {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+}
+
+.eye {
+  width: 12px;
+  height: 14px;
+  background: #1C1917;
+  border-radius: 50%;
+  position: relative;
+  animation: blink 4s ease-in-out infinite;
+}
+
+.pupil {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 5px;
+  height: 5px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.mouth {
+  text-align: center;
+  font-size: 14px;
+  color: #1C1917;
+  margin-top: 2px;
+  font-weight: bold;
+}
+
+/* === FEET === */
+.feet {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+}
+
+.foot {
+  width: 16px;
+  height: 8px;
+  background: #7C2D12;
+  border-radius: 0 0 8px 8px;
+}
+
+/* === MESSAGE BUBBLE === */
+.message-bubble {
+  position: absolute;
+  bottom: 115px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-size: 12px;
+  color: #1C1917;
+  white-space: nowrap;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  animation: bubble-in 0.3s ease-out;
+  z-index: 10;
+}
+
+.message-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #fff;
+}
+
+.message-bubble.hidden {
+  display: none;
+}
+
+/* === ANIMATIONS === */
+
+/* Breathing: subtle scale pulse */
+@keyframes breathe {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.02); }
+}
+
+/* Glow: shadow pulse synced with breathing */
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(234, 88, 12, 0.4), 0 0 40px rgba(234, 88, 12, 0.2); }
+  50% { box-shadow: 0 0 25px rgba(234, 88, 12, 0.6), 0 0 50px rgba(234, 88, 12, 0.3); }
+}
+
+/* Blink: quick eye close */
+@keyframes blink {
+  0%, 92%, 96%, 100% { transform: scaleY(1); }
+  94% { transform: scaleY(0.1); }
+}
+
+/* Idle sway: gentle left-right rocking */
+@keyframes sway {
+  0%, 100% { transform: translateX(-50%) rotate(-2deg); }
+  50% { transform: translateX(-50%) rotate(2deg); }
+}
+
+/* Walking: move horizontally with foot animation */
+@keyframes walk {
+  0% { transform: translateX(-50%) translateX(-15px); }
+  50% { transform: translateX(-50%) translateX(15px); }
+  100% { transform: translateX(-50%) translateX(-15px); }
+}
+
+@keyframes walk-foot {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* Jump: happy bounce */
+@keyframes jump {
+  0% { transform: translateY(0) scaleX(1) scaleY(1); }
+  20% { transform: translateY(0) scaleX(1.15) scaleY(0.85); }
+  40% { transform: translateY(-30px) scaleX(0.95) scaleY(1.05); }
+  60% { transform: translateY(-30px) scaleX(0.95) scaleY(1.05); }
+  80% { transform: translateY(0) scaleX(1.1) scaleY(0.9); }
+  100% { transform: translateY(0) scaleX(1) scaleY(1); }
+}
+
+/* Sad: drooping */
+@keyframes sad {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(3px) rotate(-3deg); }
+  50% { transform: translateY(5px) rotate(0deg); }
+  75% { transform: translateY(3px) rotate(3deg); }
+}
+
+/* Bubble appear */
+@keyframes bubble-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* === STATE CLASSES === */
+
+.pet.idle .pet-body {
+  animation: breathe 3s ease-in-out infinite, sway 4s ease-in-out infinite;
+}
+
+.pet.walking .pet-body {
+  animation: walk 6s ease-in-out infinite;
+}
+
+.pet.walking .foot {
+  animation: walk-foot 1s ease-in-out infinite;
+}
+
+.pet.walking .foot:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.pet.jumping .pet-body {
+  animation: jump 0.8s ease-out;
+}
+
+.pet.sad .pet-body {
+  animation: sad 2s ease-in-out infinite;
+}
+
+.pet.sad .mouth {
+  color: #78716C;
+}
+
+.pet.sad .eye {
+  animation: none;
+  transform: scaleY(0.6);
+}

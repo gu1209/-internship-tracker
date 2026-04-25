@@ -8,9 +8,12 @@
     "dev:client": "cd client && npm run dev",
     "build": "cd client && npm run build",
     "start": "cd server && node src/index.js",
-    "install:all": "npm install && cd server && npm install && cd ../client && npm install"
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "electron": "electron electron/main.js",
+    "electron:dev": "concurrently \"npm run dev:server\" \"electron electron/main.js\""
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "concurrently": "^9.1.0",
+    "electron": "^33.0.0"
   }
 }

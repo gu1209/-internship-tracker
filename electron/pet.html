@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+  <link rel="stylesheet" href="pet.css">
+</head>
+<body>
+  <div id="pet" class="pet idle">
+    <!-- Body: sunset silhouette -->
+    <div class="pet-body">
+      <div class="sunset-bg"></div>
+      <!-- Face -->
+      <div class="face">
+        <div class="eyes">
+          <div class="eye left-eye"><div class="pupil"></div></div>
+          <div class="eye right-eye"><div class="pupil"></div></div>
+        </div>
+        <div class="mouth happy">‿</div>
+      </div>
+      <!-- Feet -->
+      <div class="feet">
+        <div class="foot left-foot"></div>
+        <div class="foot right-foot"></div>
+      </div>
+    </div>
+    <!-- Message bubble -->
+    <div id="message" class="message-bubble hidden"></div>
+  </div>
+
+  <script src="pet.js"></script>
+</body>
+</html>

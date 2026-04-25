@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <div class="panel-bubble">
+    <!-- Header with tabs -->
+    <div class="panel-header">
+      <div class="tab-bar">
+        <button class="tab active" data-tab="add">📝 快速录入</button>
+        <button class="tab" data-tab="status">🔄 变更状态</button>
+        <button class="tab" data-tab="overview">📊 总览</button>
+      </div>
+    </div>
+
+    <!-- Tab content -->
+    <div class="panel-body">
+      <!-- Login tab (shown when not logged in) -->
+      <div id="login-view" class="tab-content">
+        <div class="login-form">
+          <h3>🔐 登录</h3>
+          <p class="hint">连接到你的投递管理服务器</p>
+          <div class="form-group">
+            <label>服务器地址</label>
+            <input id="server-url" type="text" placeholder="http://localhost:3001" />
+          </div>
+          <div class="form-group">
+            <label>用户名</label>
+            <input id="username" type="text" placeholder="用户名" />
+          </div>
+          <div class="form-group">
+            <label>密码</label>
+            <input id="password" type="password" placeholder="密码" />
+          </div>
+          <button id="login-btn" class="btn-primary">登录</button>
+          <div id="login-error" class="error-msg"></div>
+        </div>
+      </div>
+
+      <!-- Quick Add tab -->
+      <div id="add-view" class="tab-content hidden">
+        <div class="form-group">
+          <label>公司</label>
+          <input id="add-company" type="text" placeholder="公司名称" />
+        </div>
+        <div class="form-group">
+          <label>岗位</label>
+          <input id="add-position" type="text" placeholder="岗位名称" />
+        </div>
+        <button id="add-btn" class="btn-primary">🚀 投递！</button>
+        <div id="add-result" class="result-msg"></div>
+      </div>
+
+      <!-- Status Change tab -->
+      <div id="status-view" class="tab-content hidden">
+        <div class="form-group">
+          <label>选择投递记录</label>
+          <select id="status-select">
+            <option value="">-- 选择 --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>更新状态</label>
+          <select id="new-status">
+            <option value="笔试">笔试</option>
+            <option value="一面">一面</option>
+            <option value="二面">二面</option>
+            <option value="HR面">HR面</option>
+            <option value="offer">Offer 🎉</option>
+            <option value="拒信">拒信</option>
+            <option value="放弃">放弃</option>
+          </select>
+        </div>
+        <button id="status-btn" class="btn-primary">更新状态</button>
+        <div id="status-result" class="result-msg"></div>
+      </div>
+
+      <!-- Overview tab -->
+      <div id="overview-view" class="tab-content hidden">
+        <div id="overview-stats" class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-total">-</div>
+            <div class="stat-label">总投递</div>
+          </div>
+          <div class="stat-card offer">
+            <div class="stat-value" id="stat-offers">-</div>
+            <div class="stat-label">Offer</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-response">-</div>
+            <div class="stat-label">回复率</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-conversion">-</div>
+            <div class="stat-label">转化率</div>
+          </div>
+        </div>
+        <div id="status-dist" class="status-dist"></div>
+        <div id="stale-reminder" class="stale-reminder hidden"></div>
+        <button id="refresh-overview" class="btn-small">🔄 刷新</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="panel-footer">
+      <button id="logout-btn" class="btn-text hidden">退出登录</button>
+      <span class="user-info hidden" id="user-info"></span>
+    </div>
+
+    <!-- Bubble tail pointing to pet -->
+    <div class="bubble-tail"></div>
+  </div>
+
+  <script src="panel.js"></script>
+</body>
+</html>
