@@ -147,6 +147,14 @@ function createTray() {
   });
 }
 
+// Drag support for pet window
+ipcMain.on('drag-window', (event, dx, dy) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win) return;
+  const [x, y] = win.getPosition();
+  win.setPosition(x + dx, y + dy);
+});
+
 // IPC handlers
 ipcMain.handle('open-panel', () => {
   if (panelWin && !panelWin.isDestroyed()) {
@@ -180,24 +188,6 @@ ipcMain.handle('set-server-url', (_, url) => {
 
 ipcMain.on('pet-action', (_, action) => {
   if (petWin) petWin.webContents.send('pet-action', action);
-});
-
-// Drag support for pet window
-ipcMain.on('start-drag', (event) => {
-  const win = BrowserWindow.fromWebContents(event.sender);
-  if (!win) return;
-
-  let isDragging = true;
-  const [startX, startY] = win.getPosition();
-
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    const newX = startX + (e.screenX - startX);
-    const newY = startY + (e.screenY - startY);
-    win.setPosition(Math.round(newX), Math.round(newY));
-  };
-
-  // We use a simpler approach: let renderer handle drag via -webkit-app-region
 });
 
 app.whenReady().then(() => {

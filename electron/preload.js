@@ -5,6 +5,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openPanel: () => ipcRenderer.invoke('open-panel'),
   closePanel: () => ipcRenderer.invoke('close-panel'),
 
+  // Window dragging
+  dragWindow: (dx, dy) => ipcRenderer.send('drag-window', dx, dy),
+
   // Auth token persistence
   getToken: () => ipcRenderer.invoke('get-token'),
   setToken: (token) => ipcRenderer.invoke('set-token', token),

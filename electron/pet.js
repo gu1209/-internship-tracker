@@ -72,9 +72,41 @@ function startWalking() {
   }, 8000 + Math.random() * 7000);
 }
 
-// Click to open panel
+// === DRAG SUPPORT ===
+let isDragging = false;
+let dragStartX, dragStartY;
+let dragMoved = false;
+
+pet.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  dragMoved = false;
+  dragStartX = e.screenX;
+  dragStartY = e.screenY;
+  pet.style.cursor = 'grabbing';
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  const dx = e.screenX - dragStartX;
+  const dy = e.screenY - dragStartY;
+  if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+    dragMoved = true;
+    window.electronAPI.dragWindow(dx, dy);
+    dragStartX = e.screenX;
+    dragStartY = e.screenY;
+  }
+});
+
+document.addEventListener('mouseup', () => {
+  if (isDragging) {
+    isDragging = false;
+    pet.style.cursor = 'grab';
+  }
+});
+
+// Click to open panel (only if not dragged)
 pet.addEventListener('click', (e) => {
-  if (e.target.closest('.message-bubble')) return;
+  if (dragMoved || e.target.closest('.message-bubble')) return;
   window.electronAPI.openPanel();
 });
 

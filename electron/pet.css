@@ -27,7 +27,6 @@ body:active {
   width: 90px;
   height: 110px;
   cursor: grab;
-  -webkit-app-region: drag;
 }
 
 .pet:active {
